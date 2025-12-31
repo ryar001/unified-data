@@ -1,0 +1,20 @@
+What's New:
+- Added `.gitignore` to exclude common Python and build artifacts.
+- Added `.python-version` specifying Python 3.12.
+- Added `__version__.py` with initial version `0.0.1`.
+- Added `data_source.md` detailing kline data pulling requirements.
+- Added `pyproject.toml` for project configuration and dependencies.
+- Added `requirements.txt` listing core dependencies.
+- Added `uv.lock` file for dependency management.
+- Added `README.md` providing an overview, features, installation, and usage of the `unified-data` library.
+- Added `utils.py` with a placeholder `get_logger` function.
+- Added `src/api.py` with the main `pull_kline` entry point and adapter factory.
+- Added `src/models/enums.py` defining `MarketType`, `Columns`, and `Exchange` enums.
+- Added `src/adapters/base.py` defining the abstract `BaseAdapter`.
+- Added `src/adapters/akshare_adapter.py` for fetching data using `akshare`.
+- Added `src/adapters/ccxt_adapter.py` for fetching data using `ccxt`.
+- Added `src/adapters/yfinance_adapter.py` for fetching data using `yfinance`.
+- Added `tests/test_adapters_live.py` for live adapter testing.
+- Added `tests/test_basic.py` for basic API dispatch tests.
+- Added `tests/test_e2e.py` for end-to-end testing of the API.
+- Added `tests/test_mocked.py` for mocked API tests.
