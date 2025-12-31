@@ -5,10 +5,10 @@ import unittest
 from datetime import datetime
 
 # Add src to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from src.api import pull_kline
-from src.models.enums import MarketType, Exchange, Columns
+from unified_data.api import pull_kline
+from unified_data.models.enums import MarketType, Exchange, Columns
 
 class TestEndToEnd(unittest.TestCase):
     """

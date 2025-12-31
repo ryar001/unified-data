@@ -23,14 +23,14 @@ mock_df.__getitem__.return_value = [100.0] # Mock returning a list for df['col']
 mock_df.columns = ["ts", "open", "high", "low", "close", "vol", "symbol"] # Mock columns existence
 
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 # Now import our modules
 # We need to make sure enum_ is importable. It's in root.
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from src.api import pull_kline  # noqa: E402
-from src.models.enums import MarketType, Exchange  # noqa: E402
+from unified_data.api import pull_kline  # noqa: E402
+from unified_data.models.enums import MarketType, Exchange  # noqa: E402
 
 class TestMockedAPI(unittest.TestCase):
     def test_pull_kline_crypto_call(self):

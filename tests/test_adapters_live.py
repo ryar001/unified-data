@@ -5,12 +5,12 @@ import polars as pl
 from datetime import datetime
 
 # Add src to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from src.adapters.akshare_adapter import AKShareAdapter
-from src.adapters.ccxt_adapter import CCXTAdapter
-from src.adapters.yfinance_adapter import YFinanceAdapter
-from src.models.enums import Columns
+from unified_data.adapters.akshare_adapter import AKShareAdapter
+from unified_data.adapters.ccxt_adapter import CCXTAdapter
+from unified_data.adapters.yfinance_adapter import YFinanceAdapter
+from unified_data.models.enums import Columns
 
 class TestAdaptersLive(unittest.TestCase):
     """

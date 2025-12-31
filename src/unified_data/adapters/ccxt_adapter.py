@@ -1,9 +1,9 @@
 import ccxt
 import polars as pl
 from datetime import datetime
-from src.adapters.base import BaseAdapter
-from src.models.enums import Columns
-from utils import get_logger
+from .base import BaseAdapter
+from ..models.enums import Columns
+from ..utils import get_logger
 
 logger = get_logger("ccxt_adapter")
 

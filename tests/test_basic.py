@@ -4,14 +4,14 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 # Add src to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from src.api import pull_kline, MarketType, Exchange
-from src.models.enums import Columns
+from unified_data.api import pull_kline, MarketType, Exchange
+from unified_data.models.enums import Columns
 
 class TestDataAPI(unittest.TestCase):
     
-    @patch('src.adapters.ccxt_adapter.ccxt')
+    @patch('unified_data.adapters.ccxt_adapter.ccxt')
     def test_crypto_dispatch(self, mock_ccxt):
         # Setup mock
         mock_exchange = MagicMock()
@@ -26,7 +26,7 @@ class TestDataAPI(unittest.TestCase):
         self.assertEqual(df[Columns.SYMBOL.value][0], "BTC_USDT")
         self.assertEqual(df[Columns.CLOSE.value][0], 102.0)
 
-    @patch('src.adapters.yfinance_adapter.yf')
+    @patch('unified_data.adapters.yfinance_adapter.yf')
     def test_stock_dispatch(self, mock_yf):
         # Setup mock pandas df
         import pandas as pd

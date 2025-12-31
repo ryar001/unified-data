@@ -1,8 +1,8 @@
 import polars as pl
 from datetime import datetime
-from src.models.enums import MarketType, Exchange
-from src.adapters.base import BaseAdapter
-from utils import get_logger
+from .models.enums import MarketType, Exchange
+from .adapters.base import BaseAdapter
+from .utils import get_logger
 
 logger = get_logger("data_api")
 
@@ -25,13 +25,13 @@ def _get_adapter(market_type: str, exchange: str | None) -> BaseAdapter:
     # Dispatch to specific adapters
     # Note: Imports are inside to avoid circular deps or heavy load if not needed
     if exchange == Exchange.CCXT:
-        from src.adapters.ccxt_adapter import CCXTAdapter
+        from .adapters.ccxt_adapter import CCXTAdapter
         return CCXTAdapter()
     elif exchange == Exchange.YFINANCE:
-        from src.adapters.yfinance_adapter import YFinanceAdapter
+        from .adapters.yfinance_adapter import YFinanceAdapter
         return YFinanceAdapter()
     elif exchange == Exchange.AKSHARE:
-        from src.adapters.akshare_adapter import AKShareAdapter
+        from .adapters.akshare_adapter import AKShareAdapter
         return AKShareAdapter()
     else:
         raise ValueError(f"Unsupported exchange: {exchange}")
