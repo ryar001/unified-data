@@ -140,7 +140,7 @@ class TestAdaptersLive(unittest.TestCase):
         adapter = YFinanceAdapter()
         ticker = "AAPL"
         period = "1d"
-        
+        print("starting test_yfinance_adapter_live_stock")
         try:
             df = adapter.get_kline(ticker=ticker, period=period, limit=5)
             
@@ -177,7 +177,7 @@ class TestAdaptersLive(unittest.TestCase):
         
         try:
             df = adapter.get_kline(ticker=ticker, period=period, limit=5)
-            
+
             print(f"\n[YFinance Futures] Fetched {len(df)} rows.")
             
             self.assertIsInstance(df, pl.DataFrame)

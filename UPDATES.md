@@ -1,3 +1,15 @@
+What's New
+*   `pyproject.toml`: Added `pytest` to the `dev` dependency group.
+*   `src/unified_data/adapters/yfinance_adapter.py`: Enhanced `YFinanceAdapter` to use `yf.Ticker.history()` for more robust historical data fetching. Included an example usage block.
+*   `tests/test_yfinance_concurrency.py`: Introduced a new test suite to verify concurrent data fetching and ensure correct data structure and row limits from the `yfinance_adapter`.
+*   `uv.lock`: Updated lock file to include new development dependencies like `pytest` and its transitive dependencies.
+
+Documentation
+*   `test_overview.md`: Updated to include documentation for the new `test_yfinance_concurrency.py` test suite.
+
+Minor Changes
+*   `tests/test_adapters_live.py`: Added a debug print statement in `test_yfinance_adapter_live_stock`.
+
 **Date**: 2026-01-02
 
 **Warnings**:

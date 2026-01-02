@@ -23,7 +23,12 @@ class YFinanceAdapter(BaseAdapter):
         logger.info(f"Fetching {symbol} {period} from YFinance")
         
         try:
-            # YF usage: download(tickers, period, interval, start, end)
+            # YF usage: Ticker.history(period, interval, start, end, auto_adjust, actions)
+            # This is more robust than yf.download and returns a single-level index by default
+            
+            # Check for valid interval
+            # valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
+            
             interval = period
             
             if not end_date:
@@ -32,24 +37,26 @@ class YFinanceAdapter(BaseAdapter):
             if not start_date:
                 start_date = calculate_start_date(end_date, limit, period)
             
-            kwargs = {
-                "interval": interval, 
-                "progress": False,
-                "start": start_date,
-                "end": end_date
-            }
-
-            pdf = yf.download(symbol, **kwargs)
+            # Create Ticker object
+            ticker_obj = yf.Ticker(symbol)
+            
+            # Fetch history
+            # auto_adjust=True handles splits/dividends and returns 'Close' as adjusted
+            pdf = ticker_obj.history(
+                interval=interval,
+                start=start_date,
+                end=end_date,
+                auto_adjust=True
+            )
             
             if pdf.empty:
                 logger.warning(f"No data returned for {symbol}")
                 return pl.DataFrame()
+                
+            # yf.Ticker.history returns a DataFrame with DatetimeIndex
+            # Columns are typically: Open, High, Low, Close, Volume, Dividends, Stock Splits
+            # It comes flattened (no MultiIndex) for single ticker
             
-            # Flatten MultiIndex if necessary (yfinance sometimes returns MultiIndex for columns)
-            if isinstance(pdf.columns, (list, tuple)) or hasattr(pdf.columns, "levels"):
-                 if hasattr(pdf.columns, "get_level_values"):
-                    pdf.columns = pdf.columns.get_level_values(0)
-
             # Reset index to get Date/Datetime as column
             pdf = pdf.reset_index()
             
@@ -111,3 +118,9 @@ class YFinanceAdapter(BaseAdapter):
         except Exception as e:
             logger.error(f"YFinance Error: {e}")
             raise
+
+if __name__ == "__main__":
+    adapter = YFinanceAdapter()
+    print("Fetching AAPL")
+    df = adapter.get_kline("AAPL", "1d")
+    print(df)

@@ -8,8 +8,8 @@
 The `unified-data` package is tested using `unittest`. The suite comprises unit tests, integration tests against live APIs, and package distribution verification.
 
 ### Test Statistics
-- **Total Tests**: 28
-- **Passed**: 28
+- **Total Tests**: 29
+- **Passed**: 29
 - **Failed**: 0
 - **Errors**: 0
 
@@ -58,6 +58,13 @@ The `unified-data` package is tested using `unittest`. The suite comprises unit 
 ### 7. `tests/test_top_level_imports.py`
 **Type**: Package Verification
 - **Purpose**: Confirms that key components (`pull_kline`, `MarketType`, etc.) are exposed at the top-level package for cleaner imports.
+
+### 8. `tests/test_yfinance_concurrency.py`
+**Type**: Concurrency Verification
+- **Purpose**: Verifies thread safety and limit enforcement when fetching multiple tickers concurrently.
+- **Coverage**:
+    - Ensures all concurrent requests return valid DataFrames.
+    - Validates strict limit enforcement (e.g., exactly 5 rows returned).
 
 ### 8. `verify_external.sh`
 **Type**: Distribution Simulation
