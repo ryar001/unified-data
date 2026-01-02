@@ -1,3 +1,27 @@
+**Date**: 2026-01-02
+
+**Warnings**:
+* No breakpoints found.
+
+**Documentation**
+* **`test_overview.md`**
+    * Updated test status to '✅ All Tests Passed (28/28)'.
+    * Updated test execution time to '~30s'.
+    * Enhanced descriptions and coverage details for:
+        * `tests/test_adapters_live.py` (including specific adapter details for AKShare, CCXT, YFinance).
+        * `tests/test_limit_logic.py` and `tests/test_limit_advanced.py` (detailing limit enforcement, edge cases, compatibility, and period support).
+        * `tests/test_top_level_imports.py` (clarifying purpose).
+        * `verify_external.sh` (adding simulation, execution, and purpose details).
+    * Added notes on:
+        *   Adapter optimizations for limit fulfillment using `start_date` heuristics.
+        *   Unified import for top-level `pull_kline` function.
+        *   Verification of `uv build` packaging for third-party installation.
+
+**Refactor**
+* **`.gitignore`**
+    * Added `.ruff_cache` to ignore list.
+    * Added `.DS_Store` to ignore list.
+
 **Warnings:**
 * No breakpoints found.
 
