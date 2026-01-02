@@ -119,6 +119,18 @@ class YFinanceAdapter(BaseAdapter):
             logger.error(f"YFinance Error: {e}")
             raise
 
+    def get_exchange_symbol(self, ticker: str, market_type: str) -> str:
+        # Standard: AAPL -> AAPL
+        # Standard: GC=F -> GC=F
+        # Standard: BTC_USDT -> BTC-USD (if we supported crypto via YF)
+        
+        if market_type == "crypto" and "_" in ticker:
+             return ticker.replace("_", "-")
+             
+        # For stocks and futures, usually standard is close enough to YF
+        # e.g. GC=F is standard and YF expects GC=F
+        return ticker
+
 if __name__ == "__main__":
     adapter = YFinanceAdapter()
     print("Fetching AAPL")

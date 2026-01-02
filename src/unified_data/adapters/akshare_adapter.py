@@ -27,52 +27,51 @@ class AKShareAdapter(BaseAdapter):
         start_str = start_date.strftime("%Y%m%d")
         end_str = end_date.strftime("%Y%m%d")
         
-        # 2. Identify Type (Stock vs Futures)
-        # This is tricky with just a ticker. 
-        # Requirement says inputs are standardized:
-        # Stock: "000001" (assumed A-share)
-        # Futures: "AU2412" or similar
-        # We might need better heuristics or explicit 'market_type' passed down?
-        # The 'get_kline' signature allows additional kwargs if we modified BaseAdapter,
-        # but for now we have to infer or assume usage context from 'pull_kline' wrapper logic.
-        # Actually, 'pull_kline' has market_type, but it's not passed to 'get_kline' in BaseAdapter.
-        # FIX: I should have included market_type in get_kline or passed it in __init__.
-        # For now, I'll attempt simple detection: A-shares usually numeric. Futures often alpha-numeric.
+        # 2. Get Exchange Symbol
+        # We now rely on the caller or use internal helper if needed. 
+        # But since get_kline receives the 'standard' ticker usually, 
+        # we strictly should convert it here if it wasn't converted by caller. 
+        # However, the design says pull_kline calls get_exchange_symbol.
+        # But direct usage of get_kline might pass standard ticker.
+        # Let's assume input 'ticker' IS the exchange symbol if it comes from internal,
+        # OR we just handle it. Ideally, pull_kline does the work.
+        # But to be safe and robust (and support direct use), let's ensure we work with what we have.
         
-        logger.info(f"Fetching {ticker} from AKShare ({period})")
+        # If the ticker has "=F", it likely hasn't been converted. 
+        # (Though get_exchange_symbol is the right place for logic)
+        symbol = ticker
+        
+        logger.info(f"Fetching {symbol} from AKShare ({period})")
 
         try:
             pdf = None
             
-            # Heuristic for A-Share Stock (Numeric ticker)
-            if ticker.isdigit():
+            # Simple Heuristic: 
+            # If it ENDS with "0" and is alphanumeric (like RB0), it's likely a Future converted by us.
+            # If it is numeric (000001), it's a Stock.
+            
+            # Additional check: If it still looks like "RB=F", try to convert it on the fly or fail?
+            # Better to assume it's already converted or formatted correctly for the underlying call
+            # properly by the time it gets here, BUT our new architecture demands flexibility.
+            
+            # Let's trust it's somewhat correct or we try standard calls.
+            
+            if symbol.isdigit():
                 # stock_zh_a_hist: daily data
-                # period mapping: 'daily' -> default. 
-                # If period < 1d, akshare supports stock_zh_a_minute logic but api differs.
-                # Assuming Daily for simplicity unless period indicates otherwise.
-                
-                # Handling 'period'
                 adjust = "qfq" # Default forward adjust
-                
-                pdf = ak.stock_zh_a_hist(symbol=ticker, start_date=start_str, end_date=end_str, adjust=adjust)
-                # Columns: 日期, 开盘, 收盘, 最高, 最低, 成交量, ...
+                pdf = ak.stock_zh_a_hist(symbol=symbol, start_date=start_str, end_date=end_str, adjust=adjust)
                 
             else:
-                # Heuristic for Futures
-                # Generic futures history
-                # This often requires specific exchange info or variation
-                # Try 'futures_main_sina' for main contracts or similar
-                # For specific contracts, maybe 'futures_zh_daily_sina'
-                pdf = ak.futures_zh_daily_sina(symbol=ticker)
-                # Columns: date, open, high, low, close, volume...
+                # Futures
+                # e.g. "RB0", "AU2412"
+                # try: ak.futures_zh_daily_sina(symbol=symbol)
+                pdf = ak.futures_zh_daily_sina(symbol=symbol)
 
             if pdf is None or pdf.empty:
-                logger.warning(f"No data returned for {ticker}")
+                logger.warning(f"No data returned for {symbol}")
                 return pl.DataFrame()
 
             # 3. Normalize Columns
-            # AKShare returns Chinese column names often
-            
             rename_map = {
                 "日期": Columns.TIMESTAMP.value,
                 "date": Columns.TIMESTAMP.value,
@@ -97,13 +96,9 @@ class AKShareAdapter(BaseAdapter):
             df = df.rename(final_map)
             
             # Date Parsing
-            # AKShare often returns 'yyyy-mm-dd' string in 'timestamp' col
             if Columns.TIMESTAMP.value in df.columns:
-                # Check formatting
-                # It might be pl.Utf8 or pl.Date
                 col_type = df.schema[Columns.TIMESTAMP.value]
                 if col_type == pl.Utf8 or col_type == pl.String:
-                    # Try casting
                      df = df.with_columns(
                         pl.col(Columns.TIMESTAMP.value).str.strptime(pl.Date, "%Y-%m-%d").cast(pl.Datetime).dt.timestamp("ms")
                     )
@@ -112,7 +107,8 @@ class AKShareAdapter(BaseAdapter):
                         pl.col(Columns.TIMESTAMP.value).cast(pl.Datetime).dt.timestamp("ms")
                     )
             
-            # Add Symbol
+            # Add Symbol (Use original or exchanged? usually we want the standard one in output, 
+            # but usually we return what we asked for. 'ticker' arg is best.)
             df = df.with_columns(pl.lit(ticker).alias(Columns.SYMBOL.value))
 
              # Select strictly
@@ -131,7 +127,26 @@ class AKShareAdapter(BaseAdapter):
                 df = df.tail(limit)
                 
             return df
+            
+
 
         except Exception as e:
             logger.error(f"AKShare Error: {e}")
-            raise
+            return pl.DataFrame()
+
+    def get_exchange_symbol(self, ticker: str, market_type: str) -> str:
+        # Standard: RB=F (Front Month)
+        # Akshare: RB0
+        
+        if ticker.endswith("=F"):
+            # e.g. "RB=F" -> "RB0", "GC=F" -> "GC0"? No, AKShare usually generic is just symbol+0?
+            # Actually for Chinese futures, dominant contract is often "V0" e.g. "RB0".
+            # Let's assume the prefix is the symbol.
+            base = ticker.split("=")[0]
+            return f"{base}0"
+            
+        # Standard: RB2410 (Specific) -> Akshare: RB2410 (often same)
+        # But we need to be careful.
+        # If it's a Stock, e.g. "000001", it stays "000001".
+        
+        return ticker

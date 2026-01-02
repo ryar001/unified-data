@@ -1,3 +1,51 @@
+**Warnings**:
+None.
+
+**Feat**
+*   `src/unified_data/adapters/yfinance_adapter.py`: Enhanced `get_kline` to use `yf.Ticker.history` for more robust data fetching, supporting `interval`, `start_date`, `end_date`, and `auto_adjust=True`. Added an example usage block.
+
+**Tests**
+*   `tests/test_yfinance_concurrency.py`: Added a new test file for `YFinanceAdapter` to verify concurrency, thread safety, and strict limit enforcement. Ensures correct DataFrame structure, row count, and columns.
+*   `test_overview.md`: Documented the new `test_yfinance_concurrency.py` test, detailing its purpose and coverage.
+*   `tests/test_basic.py`: Added mocks for `yf.Ticker` and `yf.Ticker.history` in `TestDataAPI.test_pull_kline`.
+
+**Bugfix**
+*   `src/unified_data/adapters/akshare_adapter.py`: Refined `get_kline` logic and added `get_exchange_symbol` to handle AKShare's specific symbol formats (e.g., "RB=F" -> "RB0").
+*   `src/unified_data/api.py`: Modified `pull_kline` to use `adapter.get_exchange_symbol` for converting standard tickers to exchange-specific symbols before fetching data, ensuring consistency. It also ensures the original standard ticker is returned in the DataFrame.
+
+**Refactor**
+*   `src/unified_data/adapters/base.py`: Introduced `get_exchange_symbol` as an abstract method, enforcing consistent symbol conversion across all adapters.
+*   `src/unified_data/adapters/akshare_adapter.py`: Streamlined `get_kline` logic and added comprehensive logging.
+*   `src/unified_data/adapters/ccxt_adapter.py`: Implemented `get_exchange_symbol` to convert standard crypto tickers (e.g., "BTC_USDT") to CCXT's format ("BTC/USDT").
+*   `src/unified_data/adapters/yfinance_adapter.py`: Implemented `get_exchange_symbol` to handle crypto ticker conversions for YFinance (e.g., "BTC_USDT" to "BTC-USD").
+*   `tests/test_mocked.py`: Significantly refactored test setup using `setUp` and `tearDown` for better isolation and mocking of external dependencies (`polars`, `ccxt`, `yfinance`, `akshare`) and DataFrame behavior.
+
+**Chore**
+*   `pyproject.toml`: Added `pytest>=9.0.2` to the development dependency group.
+*   `uv.lock`: Updated package lockfile with new dependencies, including `pytest`, `iniconfig`, `packaging`, `pluggy`, and `pygments`.
+
+**Other**
+*   `tests/test_adapters_live.py`: Added a print statement for logging during live adapter tests.
+*   `src/unified_data/adapters/yfinance_adapter.py`: Added a `print(df)` statement within the `get_kline` method.
+
+Feat
+----
+* `src/unified_data/adapters/yfinance_adapter.py`: Enhanced `get_kline` to use `yf.Ticker.history` for more robust data fetching, supporting `interval`, `start_date`, `end_date`, and `auto_adjust=True`. Added an example usage block.
+
+Tests
+-----
+* `tests/test_yfinance_concurrency.py`: Added a new test file for `YFinanceAdapter` to verify concurrency, thread safety, and strict limit enforcement. Ensures correct DataFrame structure, row count, and columns.
+* `test_overview.md`: Documented the new `test_yfinance_concurrency.py` test, detailing its purpose and coverage.
+
+Chore
+-----
+* `pyproject.toml`: Added `pytest>=9.0.2` to the development dependency group.
+* `uv.lock`: Updated package lockfile with new dependencies, including `pytest`, `iniconfig`, `packaging`, `pluggy`, and `pygments`.
+
+Other
+-----
+* `tests/test_adapters_live.py`: Added a print statement for logging during live adapter tests.
+
 What's New
 *   `pyproject.toml`: Added `pytest` to the `dev` dependency group.
 *   `src/unified_data/adapters/yfinance_adapter.py`: Enhanced `YFinanceAdapter` to use `yf.Ticker.history()` for more robust historical data fetching. Included an example usage block.

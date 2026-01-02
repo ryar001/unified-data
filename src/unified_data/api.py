@@ -64,10 +64,17 @@ def pull_kline(
     
     try:
         adapter, exchange_name = _get_adapter(market_type, exchange)
-        df = adapter.get_kline(ticker, period, start_date, end_date, limit)
+        
+        # Convert standard ticker to exchange symbol
+        exchange_ticker = adapter.get_exchange_symbol(ticker, market_type)
+        
+        df = adapter.get_kline(exchange_ticker, period, start_date, end_date, limit)
         
         if not df.is_empty():
-            df = df.with_columns(pl.lit(exchange_name).alias(Columns.EXCHANGE.value))
+            df = df.with_columns([
+                pl.lit(exchange_name).alias(Columns.EXCHANGE.value),
+                pl.lit(ticker).alias(Columns.SYMBOL.value)  # Ensure standard ticker is returned
+            ])
 
         return df
     except Exception as e:

@@ -3,25 +3,10 @@ import os
 import unittest
 from unittest.mock import MagicMock
 
-# 1. Mock External Dependencies BEFORE importing src.api
-# This is necessary because we don't have them installed in this environment
-mock_pl = MagicMock()
-sys.modules["polars"] = mock_pl
-sys.modules["ccxt"] = MagicMock()
-sys.modules["yfinance"] = MagicMock()
-sys.modules["akshare"] = MagicMock()
+# 1. Mock External Dependencies (Moved to setUp/tearDown to avoid side effects)
+
 
 # Mock DataFrame behavior to avoid crashes when calling methods on it
-mock_df = MagicMock()
-mock_pl.DataFrame.return_value = mock_df
-mock_pl.from_pandas.return_value = mock_df
-mock_df.select.return_value = mock_df
-mock_df.rename.return_value = mock_df
-mock_df.with_columns.return_value = mock_df
-mock_df.tail.return_value = mock_df
-mock_df.__getitem__.return_value = [100.0] # Mock returning a list for df['col']
-mock_df.columns = ["ts", "open", "high", "low", "close", "vol", "symbol"] # Mock columns existence
-
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
@@ -33,6 +18,43 @@ from unified_data.api import pull_kline  # noqa: E402
 from unified_data.models.enums import MarketType, Exchange  # noqa: E402
 
 class TestMockedAPI(unittest.TestCase):
+    def setUp(self):
+        self.original_modules = sys.modules.copy()
+        
+        self.mock_pl = MagicMock()
+        self.mock_ccxt = MagicMock()
+        self.mock_yf = MagicMock()
+        self.mock_ak = MagicMock()
+        
+        # Patch modules
+        sys.modules["polars"] = self.mock_pl
+        sys.modules["ccxt"] = self.mock_ccxt
+        sys.modules["yfinance"] = self.mock_yf
+        sys.modules["akshare"] = self.mock_ak
+        
+        # Setup mock DataFrame
+        self.mock_df = MagicMock()
+        self.mock_pl.DataFrame.return_value = self.mock_df
+        self.mock_pl.from_pandas.return_value = self.mock_df
+        self.mock_df.select.return_value = self.mock_df
+        self.mock_df.rename.return_value = self.mock_df
+        self.mock_df.with_columns.return_value = self.mock_df
+        self.mock_df.tail.return_value = self.mock_df
+        self.mock_df.__getitem__.return_value = [100.0] 
+        self.mock_df.columns = ["ts", "open", "high", "low", "close", "volume", "symbol"]
+        self.mock_df.is_empty.return_value = False
+
+    def tearDown(self):
+        # Restore original modules
+        # Remove mocks we added
+        for mod in ["polars", "ccxt", "yfinance", "akshare"]:
+            if mod in self.original_modules:
+                sys.modules[mod] = self.original_modules[mod]
+            else:
+                del sys.modules[mod]
+
+        # Force re-import of src modules if needed, though typically unittest runs isolations differently.
+        # But safest is just to clean sys.modules.
     def test_pull_kline_crypto_call(self):
         # We just want to ensure it calls the right adapter and returns the mock df
         try:

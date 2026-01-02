@@ -18,7 +18,8 @@ class CCXTAdapter(BaseAdapter):
     ) -> pl.DataFrame:
         
         # 1. Parse ticker (BTC_USDT -> BTC/USDT)
-        symbol = ticker.replace("_", "/")
+        # Ideally this comes resolved, but for robustness:
+        symbol = self.get_exchange_symbol(ticker, "crypto")
         
         # 2. Initialize Exchange (Default to Binance for now, or generic)
         # In a real app, this might come from config or the ticker string itself
@@ -74,3 +75,7 @@ class CCXTAdapter(BaseAdapter):
         )
 
         return df
+
+    def get_exchange_symbol(self, ticker: str, market_type: str) -> str:
+        # Standard: BTC_USDT -> CCXT: BTC/USDT
+        return ticker.replace("_", "/")

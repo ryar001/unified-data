@@ -22,6 +22,20 @@ class BaseAdapter(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_exchange_symbol(self, ticker: str, market_type: str) -> str:
+        """
+        Convert standard ticker to exchange-specific symbol.
+        
+        Args:
+            ticker: Standardized ticker (e.g., "BTC_USDT", "RB=F").
+            market_type: Market type (crypto, stock, futures).
+            
+        Returns:
+            Exchange specific symbol (e.g., "BTC/USDT", "RB0").
+        """
+        pass
+
     def standardize_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Helper to ensure columns match the standard."""
         # This is a placeholder; implementations might enforce this 

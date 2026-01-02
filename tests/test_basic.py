@@ -35,7 +35,11 @@ class TestDataAPI(unittest.TestCase):
             'Date': [pd.Timestamp("2020-01-01")]
         }
         pdf = pd.DataFrame(data)
-        mock_yf.download.return_value = pdf
+        # Mock yf.Ticker object
+        mock_ticker = MagicMock()
+        mock_yf.Ticker.return_value = mock_ticker
+        mock_ticker.history.return_value = pdf
+        # mock_yf.download.return_value = pdf # Old usage
         
         df = pull_kline("AAPL", MarketType.STOCK, "1d", exchange=Exchange.YFINANCE)
         
