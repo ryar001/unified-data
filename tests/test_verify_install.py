@@ -1,6 +1,5 @@
-import sys
 import unittest
-from unified_data.api import pull_kline, MarketType
+from unified_data import pull_kline, MarketType
 
 class TestInstalledPackage(unittest.TestCase):
     def test_live_pull(self):

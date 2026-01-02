@@ -1,3 +1,27 @@
+**Warnings:**
+* No breakpoints found.
+
+**What's New:**
+*   **New Files:**
+    *   `tests/test_kline_exchange_column.py`: Adds tests for the 'exchange' column in `pull_kline`.
+    *   `tests/test_limit_advanced.py`: Introduces advanced tests for the 'limit' parameter.
+    *   `tests/test_limit_logic.py`: Verifies strict enforcement of the 'limit' parameter.
+    *   `tests/test_top_level_imports.py`: Ensures top-level importability of core components.
+    *   `verify_external.sh`: A script to verify external installation and usage of the package.
+*   **New Features/Utilities:**
+    *   `src/unified_data/utils.py`: Introduces `calculate_start_date` for robust date range calculation in adapters.
+    *   `src/unified_data/api.py`: Unified adapter handling and exposes `Exchange` and `Columns` enums.
+
+**Bugfix:**
+*   **`src/unified_data/api.py`**: Ensures the 'exchange' column is consistently added to the output DataFrame from `pull_kline`.
+*   **`src/unified_data/adapters/akshare_adapter.py`**: Improves date handling by using `calculate_start_date` when start/end dates are not provided.
+*   **`src/unified_data/adapters/yfinance_adapter.py`**: Improves date handling by using `calculate_start_date` when start/end dates are not provided, and correctly passes parameters to `yf.download`.
+
+**Refactor/Code Organization:**
+*   **`src/unified_data/__init__.py`**: Exports `pull_kline`, `MarketType`, `Exchange`, and `Columns` for top-level access.
+*   **`README.md`**: Updated to reflect the default limit of 200, the addition of the 'exchange' column, and example imports.
+*   **`tests/test_verify_install.py`**: Added `MarketType` import.
+
 What's New:
 - Added `.gitignore` to exclude common Python and build artifacts.
 - Added `.python-version` specifying Python 3.12.

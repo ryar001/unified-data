@@ -22,15 +22,14 @@ pip install unified-data
 
 ```python
 import polars as pl
-from unified_data.api import pull_kline
-from unified_data.models.enums import MarketType
+from unified_data import pull_kline, MarketType
 
 # 1. Pull Crypto Data (BTC/USDT)
 df_crypto = pull_kline(
     ticker="BTC_USDT",
     market_type=MarketType.CRYPTO,
     period="1d",
-    limit=100
+    limit=200
 )
 print(df_crypto.head())
 
@@ -76,7 +75,7 @@ def pull_kline(
     period: str, 
     start_date: datetime | str | None = None, 
     end_date: datetime | str | None = None, 
-    limit: int = 100,
+    limit: int = 200,
     exchange: str | None = None
 ) -> pl.DataFrame
 ```
@@ -91,7 +90,7 @@ def pull_kline(
 - `period` (str): Timeframe interval (e.g., `1m`, `1h`, `1d`).
 - `start_date` (datetime | str, optional): Start time for data.
 - `end_date` (datetime | str, optional): End time for data.
-- `limit` (int): Number of candles to retrieve (default: 100).
+- `limit` (int): Number of candles to retrieve (default: 200).
 - `exchange` (str, optional): Force a specific exchange backend (e.g., `ccxt`, `yfinance`, `akshare`).
 
 **Returns:**
@@ -103,6 +102,7 @@ A `polars.DataFrame` with the following columns:
 - `close`: Close price
 - `vol`: Volume
 - `symbol`: The ticker symbol
+- `exchange`: The exchange/source name (e.g., `ccxt`, `yfinance`)
 
 ---
 

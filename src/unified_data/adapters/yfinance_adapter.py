@@ -3,7 +3,7 @@ import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
 from ..models.enums import Columns
-from ..utils import get_logger
+from ..utils import get_logger, calculate_start_date
 
 logger = get_logger("yfinance_adapter")
 
@@ -14,7 +14,7 @@ class YFinanceAdapter(BaseAdapter):
         period: str, 
         start_date: datetime | None = None, 
         end_date: datetime | None = None, 
-        limit: int = 100
+        limit: int = 200
     ) -> pl.DataFrame:
         
         # 1. Ticker is usually consistent (AAPL, GC=F), but ensure safe string
@@ -24,28 +24,20 @@ class YFinanceAdapter(BaseAdapter):
         
         try:
             # YF usage: download(tickers, period, interval, start, end)
-            # Mapping 'period' (timeframe) to YF interval. 
-            # Note: YF 'period' arg is for "how much history", 'interval' is candle size.
-            # My api 'period' usually means candle size (1d, 1h).
-            
-            # Helper to map standard periods to YF intervals if needed
-            # For now assume direct pass-through or simple mapping
             interval = period
             
-            # If start/end provided, use them. Else YF defaults or use 'limit' approx?
-            # YF doesn't strictly support 'limit' rows, it supports date ranges.
-            # We might just fetch a default period like "1mo" if no dates given.
+            if not end_date:
+                end_date = datetime.now()
             
-            kwargs = {"interval": interval, "progress": False}
-            if start_date:
-                kwargs["start"] = start_date
-            if end_date:
-                kwargs["end"] = end_date
+            if not start_date:
+                start_date = calculate_start_date(end_date, limit, period)
             
-            if not start_date and not end_date:
-                # Fallback to fetch enough data for 'limit'
-                # logic is imperfect without knowing timeframe size vs limit
-                kwargs["period"] = "1mo" 
+            kwargs = {
+                "interval": interval, 
+                "progress": False,
+                "start": start_date,
+                "end": end_date
+            }
 
             pdf = yf.download(symbol, **kwargs)
             

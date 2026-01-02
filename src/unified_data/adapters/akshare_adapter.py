@@ -3,7 +3,7 @@ import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
 from ..models.enums import Columns
-from ..utils import get_logger
+from ..utils import get_logger, calculate_start_date
 
 logger = get_logger("akshare_adapter")
 
@@ -18,8 +18,14 @@ class AKShareAdapter(BaseAdapter):
     ) -> pl.DataFrame:
         
         # 1. Prepare Dates (AKShare often expects 'YYYYMMDD' strings)
-        start_str = start_date.strftime("%Y%m%d") if start_date else "20200101"
-        end_str = end_date.strftime("%Y%m%d") if end_date else datetime.now().strftime("%Y%m%d")
+        if not end_date:
+            end_date = datetime.now()
+            
+        if not start_date:
+            start_date = calculate_start_date(end_date, limit, period)
+            
+        start_str = start_date.strftime("%Y%m%d")
+        end_str = end_date.strftime("%Y%m%d")
         
         # 2. Identify Type (Stock vs Futures)
         # This is tricky with just a ticker. 

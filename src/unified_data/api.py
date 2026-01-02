@@ -1,13 +1,13 @@
 import polars as pl
 from datetime import datetime
-from .models.enums import MarketType, Exchange
+from .models.enums import MarketType, Exchange, Columns
 from .adapters.base import BaseAdapter
 from .utils import get_logger
 
 logger = get_logger("data_api")
 
-def _get_adapter(market_type: str, exchange: str | None) -> BaseAdapter:
-    """Factory to get the correct adapter instance."""
+def _get_adapter(market_type: str, exchange: str | None) -> tuple[BaseAdapter, str]:
+    """Factory to get the correct adapter instance and the resolved exchange name."""
     
     # Default routing logic
     if exchange is None:
@@ -26,13 +26,13 @@ def _get_adapter(market_type: str, exchange: str | None) -> BaseAdapter:
     # Note: Imports are inside to avoid circular deps or heavy load if not needed
     if exchange == Exchange.CCXT:
         from .adapters.ccxt_adapter import CCXTAdapter
-        return CCXTAdapter()
+        return CCXTAdapter(), exchange
     elif exchange == Exchange.YFINANCE:
         from .adapters.yfinance_adapter import YFinanceAdapter
-        return YFinanceAdapter()
+        return YFinanceAdapter(), exchange
     elif exchange == Exchange.AKSHARE:
         from .adapters.akshare_adapter import AKShareAdapter
-        return AKShareAdapter()
+        return AKShareAdapter(), exchange
     else:
         raise ValueError(f"Unsupported exchange: {exchange}")
 
@@ -42,7 +42,7 @@ def pull_kline(
     period: str, 
     start_date: datetime | str | None = None, 
     end_date: datetime | str | None = None, 
-    limit: int = 100,
+    limit: int = 200,
     exchange: str | None = None
 ) -> pl.DataFrame:
     """
@@ -63,8 +63,12 @@ def pull_kline(
     logger.info(f"Pulling kline for {ticker} ({market_type}) exchange={exchange}")
     
     try:
-        adapter = _get_adapter(market_type, exchange)
+        adapter, exchange_name = _get_adapter(market_type, exchange)
         df = adapter.get_kline(ticker, period, start_date, end_date, limit)
+        
+        if not df.is_empty():
+            df = df.with_columns(pl.lit(exchange_name).alias(Columns.EXCHANGE.value))
+
         return df
     except Exception as e:
         logger.error(f"Failed to pull data: {e}")
