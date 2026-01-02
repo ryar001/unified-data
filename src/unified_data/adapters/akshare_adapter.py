@@ -2,7 +2,7 @@ import akshare as ak
 import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
-from ..models.enums import Columns
+from ..models.enums import Columns, MarketType
 from ..utils import get_logger, calculate_start_date
 
 logger = get_logger("akshare_adapter")
@@ -14,7 +14,8 @@ class AKShareAdapter(BaseAdapter):
         period: str, 
         start_date: datetime | None = None, 
         end_date: datetime | None = None, 
-        limit: int = 100
+        limit: int = 100,
+        market_type: MarketType | str | None = None
     ) -> pl.DataFrame:
         
         # 1. Prepare Dates (AKShare often expects 'YYYYMMDD' strings)
@@ -28,35 +29,21 @@ class AKShareAdapter(BaseAdapter):
         end_str = end_date.strftime("%Y%m%d")
         
         # 2. Get Exchange Symbol
-        # We now rely on the caller or use internal helper if needed. 
-        # But since get_kline receives the 'standard' ticker usually, 
-        # we strictly should convert it here if it wasn't converted by caller. 
-        # However, the design says pull_kline calls get_exchange_symbol.
-        # But direct usage of get_kline might pass standard ticker.
-        # Let's assume input 'ticker' IS the exchange symbol if it comes from internal,
-        # OR we just handle it. Ideally, pull_kline does the work.
-        # But to be safe and robust (and support direct use), let's ensure we work with what we have.
-        
-        # If the ticker has "=F", it likely hasn't been converted. 
-        # (Though get_exchange_symbol is the right place for logic)
-        symbol = ticker
+        # Heuristic inference if not provided
+        if not market_type:
+            if ticker.isdigit():
+                 market_type = MarketType.STOCK
+            else:
+                 market_type = MarketType.FUTURES
+
+        symbol = self.get_exchange_symbol(ticker, market_type)
         
         logger.info(f"Fetching {symbol} from AKShare ({period})")
 
         try:
             pdf = None
             
-            # Simple Heuristic: 
-            # If it ENDS with "0" and is alphanumeric (like RB0), it's likely a Future converted by us.
-            # If it is numeric (000001), it's a Stock.
-            
-            # Additional check: If it still looks like "RB=F", try to convert it on the fly or fail?
-            # Better to assume it's already converted or formatted correctly for the underlying call
-            # properly by the time it gets here, BUT our new architecture demands flexibility.
-            
-            # Let's trust it's somewhat correct or we try standard calls.
-            
-            if symbol.isdigit():
+            if market_type == MarketType.STOCK:
                 # stock_zh_a_hist: daily data
                 adjust = "qfq" # Default forward adjust
                 pdf = ak.stock_zh_a_hist(symbol=symbol, start_date=start_str, end_date=end_str, adjust=adjust)
@@ -137,6 +124,9 @@ class AKShareAdapter(BaseAdapter):
     def get_exchange_symbol(self, ticker: str, market_type: str) -> str:
         # Standard: RB=F (Front Month)
         # Akshare: RB0
+        
+        # Normalize to upper
+        ticker = ticker.upper()
         
         if ticker.endswith("=F"):
             # e.g. "RB=F" -> "RB0", "GC=F" -> "GC0"? No, AKShare usually generic is just symbol+0?

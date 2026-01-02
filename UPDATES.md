@@ -1,3 +1,26 @@
+REFACTOR:
+  src/unified_data/adapters/akshare_adapter.py:
+    - Integrated `get_exchange_symbol` for symbol resolution.
+    - Added heuristic for `market_type` inference when not provided.
+    - Normalized tickers to uppercase.
+  src/unified_data/adapters/base.py:
+    - Added `get_exchange_symbol` method.
+    - Updated adapter `__init__` signatures to include `market_type` and `limit`.
+    - Imported `Columns` and `MarketType` enums.
+  src/unified_data/adapters/ccxt_adapter.py:
+    - Set default `market_type` to `MarketType.CRYPTO`.
+    - Integrated `get_exchange_symbol`.
+    - Normalized tickers to uppercase.
+  src/unified_data/adapters/yfinance_adapter.py:
+    - Set default `market_type` to `MarketType.STOCK`.
+    - Integrated `get_exchange_symbol`.
+    - Normalized tickers to uppercase.
+    - Added specific handling for crypto tickers containing underscores.
+TEST:
+  tests/test_standard_symbol.py:
+    - New file: Added tests to verify mixed-case and standard symbol normalization for futures, crypto, and stocks across `AKShareAdapter`, `CCXTAdapter`, and `YFinanceAdapter`.
+    - Includes tests for numeric stock tickers.
+
 **Warnings**:
 None.
 

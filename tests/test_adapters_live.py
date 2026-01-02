@@ -86,6 +86,7 @@ class TestAdaptersLive(unittest.TestCase):
         # Use helper to get a likely valid front-ish month contract for Gold (AU)
         ticker = self._get_china_futures_front_month("AU")
         period = "daily" 
+
         
         try:
             print(f"\n[AKShare Futures] Requesting ticker: {ticker}")

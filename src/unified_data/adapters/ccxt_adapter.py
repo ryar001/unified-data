@@ -2,7 +2,7 @@ import ccxt
 import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
-from ..models.enums import Columns
+from ..models.enums import Columns, MarketType
 from ..utils import get_logger
 
 logger = get_logger("ccxt_adapter")
@@ -14,12 +14,13 @@ class CCXTAdapter(BaseAdapter):
         period: str, 
         start_date: datetime | None = None, 
         end_date: datetime | None = None, 
-        limit: int = 100
+        limit: int = 100,
+        market_type: MarketType | str | None = None
     ) -> pl.DataFrame:
         
         # 1. Parse ticker (BTC_USDT -> BTC/USDT)
-        # Ideally this comes resolved, but for robustness:
-        symbol = self.get_exchange_symbol(ticker, "crypto")
+        market_type = market_type or MarketType.CRYPTO
+        symbol = self.get_exchange_symbol(ticker, market_type)
         
         # 2. Initialize Exchange (Default to Binance for now, or generic)
         # In a real app, this might come from config or the ticker string itself
@@ -78,4 +79,6 @@ class CCXTAdapter(BaseAdapter):
 
     def get_exchange_symbol(self, ticker: str, market_type: str) -> str:
         # Standard: BTC_USDT -> CCXT: BTC/USDT
+        # Normalize
+        ticker = ticker.upper()
         return ticker.replace("_", "/")

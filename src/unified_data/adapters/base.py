@@ -1,6 +1,8 @@
-from abc import ABC, abstractmethod
-import polars as pl
+
+from ..models.enums import Columns, MarketType
 from datetime import datetime
+import polars as pl
+from abc import ABC, abstractmethod
 
 
 class BaseAdapter(ABC):
@@ -13,7 +15,8 @@ class BaseAdapter(ABC):
         period: str, 
         start_date: datetime | None = None, 
         end_date: datetime | None = None, 
-        limit: int = 100
+        limit: int = 100,
+        market_type: MarketType | str | None = None
     ) -> pl.DataFrame:
         """
         Fetch kline data and return a standardized Polars DataFrame.
@@ -23,7 +26,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_exchange_symbol(self, ticker: str, market_type: str) -> str:
+    def get_exchange_symbol(self, ticker: str, market_type: MarketType | str) -> str:
         """
         Convert standard ticker to exchange-specific symbol.
         

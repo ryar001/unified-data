@@ -2,7 +2,7 @@ import yfinance as yf
 import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
-from ..models.enums import Columns
+from ..models.enums import Columns, MarketType
 from ..utils import get_logger, calculate_start_date
 
 logger = get_logger("yfinance_adapter")
@@ -14,11 +14,13 @@ class YFinanceAdapter(BaseAdapter):
         period: str, 
         start_date: datetime | None = None, 
         end_date: datetime | None = None, 
-        limit: int = 200
+        limit: int = 200,
+        market_type: MarketType | str | None = None
     ) -> pl.DataFrame:
         
         # 1. Ticker is usually consistent (AAPL, GC=F), but ensure safe string
-        symbol = ticker
+        market_type = market_type or MarketType.STOCK
+        symbol = self.get_exchange_symbol(ticker, market_type)
         
         logger.info(f"Fetching {symbol} {period} from YFinance")
         
@@ -124,7 +126,10 @@ class YFinanceAdapter(BaseAdapter):
         # Standard: GC=F -> GC=F
         # Standard: BTC_USDT -> BTC-USD (if we supported crypto via YF)
         
-        if market_type == "crypto" and "_" in ticker:
+        # Normalize to upper
+        ticker = ticker.upper()
+        
+        if market_type == MarketType.CRYPTO and "_" in ticker:
              return ticker.replace("_", "-")
              
         # For stocks and futures, usually standard is close enough to YF
