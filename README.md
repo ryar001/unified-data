@@ -1,5 +1,8 @@
 # unified-data
 
+[![PyPI version](https://badge.fury.io/py/unified-data.svg)](https://badge.fury.io/py/unified-data)
+[![PyPI](https://img.shields.io/pypi/v/unified-data)](https://pypi.org/project/unified-data/)
+
 **Unified Kline Data Interface**
 
 `unified-data` allows you to pull standardized kline (candlestick) data from various financial markets (Crypto, Stocks, Futures) through a single, unified interface. It handles the complexity of exchange-specific API differences, so you can focus on analysis.

@@ -1,3 +1,7 @@
+What's New - 2026-01-05
+  README.md
+    - Added PyPI version badges to the README file.
+
 **Date**: 2026-01-05
 
 **Warnings**:
