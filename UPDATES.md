@@ -1,3 +1,25 @@
+**Date**: 2026-01-05
+
+**Warnings**:
+*   No breakpoints found.
+
+**What's New**:
+*   `error_log.md`: Documented adapter error handling test results for wrong symbols and API errors.
+*   `reproduce_issue.py`: Added a script to reproduce a specific AKShare adapter error.
+*   `src/unified_data/models/enums.py`: Introduced `Status` enum for API responses (`OK`, `FAILED`).
+*   `src/unified_data/models/types.py`: Defined `KlineData` dataclass for structured API responses, including status, data (DataFrame), and error message.
+*   `tests/test_adapters_error_handling.py`: New tests to verify adapter behavior with invalid symbols (AKShare, CCXT, YFinance).
+*   `tests/test_api_response.py`: New tests to validate the `KlineData` object structure and status codes in API responses for success and failure cases.
+*   `tests/test_limits.py`: Consolidated and enhanced tests for the `limit` parameter across different adapters and edge cases.
+*   `test_overview.md`: Updated to reflect the new `KlineData` response format and the expanded error handling tests.
+
+**Refactor**:
+*   `src/unified_data/api.py`:
+    *   Modified `pull_kline` to return a `KlineData` object instead of a raw DataFrame, providing explicit status and error information.
+    *   Added logic to handle empty DataFrames by returning `Status.FAILED`.
+    *   Ensured `exchange` and `ticker` columns are added to successful results.
+*   Deleted files `tests/test_limit_advanced.py` and `tests/test_limit_logic.py` as their functionality has been merged into `tests/test_limits.py`.
+
 REFACTOR:
   src/unified_data/adapters/akshare_adapter.py:
     - Integrated `get_exchange_symbol` for symbol resolution.

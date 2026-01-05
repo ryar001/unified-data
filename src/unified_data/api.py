@@ -1,6 +1,7 @@
 import polars as pl
 from datetime import datetime
-from .models.enums import MarketType, Exchange, Columns
+from .models.enums import MarketType, Exchange, Columns, Status
+from .models.types import KlineData
 from .adapters.base import BaseAdapter
 from .utils import get_logger
 
@@ -44,7 +45,7 @@ def pull_kline(
     end_date: datetime | str | None = None, 
     limit: int = 200,
     exchange: str | None = None
-) -> pl.DataFrame:
+) -> KlineData:
     """
     Main entry point to pull kline data.
     
@@ -58,7 +59,7 @@ def pull_kline(
         exchange: Optional exchange name.
 
     Returns:
-        polars.DataFrame: Standardized OHLCV data.
+        KlineData: Object containing status, data (polars.DataFrame), and error message.
     """
     logger.info(f"Pulling kline for {ticker} ({market_type}) exchange={exchange}")
     
@@ -70,13 +71,18 @@ def pull_kline(
         
         df = adapter.get_kline(exchange_ticker, period, start_date, end_date, limit)
         
-        if not df.is_empty():
-            df = df.with_columns([
-                pl.lit(exchange_name).alias(Columns.EXCHANGE.value),
-                pl.lit(ticker).alias(Columns.SYMBOL.value)  # Ensure standard ticker is returned
-            ])
+        if df.is_empty():
+             logger.warning(f"No data returned for {ticker}")
+             return KlineData(status=Status.FAILED, error="No data returned", data=df)
 
-        return df
+        df = df.with_columns([
+            pl.lit(exchange_name).alias(Columns.EXCHANGE.value),
+            pl.lit(ticker).alias(Columns.SYMBOL.value)  # Ensure standard ticker is returned
+        ])
+
+        return KlineData(status=Status.OK, data=df)
+
     except Exception as e:
         logger.error(f"Failed to pull data: {e}")
-        raise
+        # Return empty dataframe on error for safety, or just default which is empty
+        return KlineData(status=Status.FAILED, error=str(e))

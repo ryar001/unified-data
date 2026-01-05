@@ -34,13 +34,14 @@ class TestEndToEnd(unittest.TestCase):
     def test_e2e_us_stock_yfinance(self):
         """Test E2E flow for US Stock (YFinance)."""
         ticker = "MSFT"
-        df = pull_kline(
+        res = pull_kline(
             ticker=ticker,
             market_type=MarketType.STOCK,
             period="1d",
             limit=5,
             exchange=Exchange.YFINANCE
         )
+        df = res.data
         self.assertFalse(df.is_empty(), "US Stock data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
         print(f"\n[E2E US Stock] Fetched {len(df)} rows for {ticker}")
@@ -48,13 +49,14 @@ class TestEndToEnd(unittest.TestCase):
     def test_e2e_crypto_ccxt(self):
         """Test E2E flow for Crypto (CCXT/Binance)."""
         ticker = "ETH_USDT"
-        df = pull_kline(
+        res = pull_kline(
             ticker=ticker,
             market_type=MarketType.CRYPTO,
             period="1d",
             limit=5,
             exchange=Exchange.CCXT
         )
+        df = res.data
         self.assertFalse(df.is_empty(), "Crypto data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
         print(f"\n[E2E Crypto] Fetched {len(df)} rows for {ticker}")
@@ -62,13 +64,14 @@ class TestEndToEnd(unittest.TestCase):
     def test_e2e_china_stock_akshare(self):
         """Test E2E flow for China Stock (AKShare)."""
         ticker = "600519" # Kweichow Moutai
-        df = pull_kline(
+        res = pull_kline(
             ticker=ticker,
-            market_type=MarketType.STOCK, # Note: Currently manually routing to AKSHARE
+            market_type=MarketType.STOCK,
             period="daily",
             limit=5,
             exchange=Exchange.AKSHARE
         )
+        df = res.data
         self.assertFalse(df.is_empty(), "China Stock data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
         print(f"\n[E2E China Stock] Fetched {len(df)} rows for {ticker}")
@@ -76,13 +79,14 @@ class TestEndToEnd(unittest.TestCase):
     def test_e2e_us_futures_yfinance(self):
         """Test E2E flow for US Futures (YFinance)."""
         ticker = "ES=F" # S&P 500 Futures
-        df = pull_kline(
+        res = pull_kline(
             ticker=ticker,
             market_type=MarketType.FUTURES,
             period="1d",
             limit=5,
             exchange=Exchange.YFINANCE
         )
+        df = res.data
         self.assertFalse(df.is_empty(), "US Futures data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
         print(f"\n[E2E US Futures] Fetched {len(df)} rows for {ticker}")
@@ -90,13 +94,14 @@ class TestEndToEnd(unittest.TestCase):
     def test_e2e_china_futures_akshare(self):
         """Test E2E flow for China Futures (AKShare)."""
         ticker = self._get_china_futures_front_month("RB") # Rebar Futures
-        df = pull_kline(
+        res = pull_kline(
             ticker=ticker,
             market_type=MarketType.FUTURES,
             period="daily",
             limit=5,
             exchange=Exchange.AKSHARE
         )
+        df = res.data
         self.assertFalse(df.is_empty(), "China Futures data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
         print(f"\n[E2E China Futures] Fetched {len(df)} rows for {ticker}")

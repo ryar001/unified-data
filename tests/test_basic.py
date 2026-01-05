@@ -20,7 +20,8 @@ class TestDataAPI(unittest.TestCase):
             [1600000000000, 100, 105, 95, 102, 1000] # Timestamp, Open, High, Low, Close, Volume
         ]
         
-        df = pull_kline("BTC_USDT", MarketType.CRYPTO, "1d", limit=1)
+        result = pull_kline("BTC_USDT", MarketType.CRYPTO, "1d", limit=1)
+        df = result.data
         
         self.assertFalse(df.is_empty())
         self.assertEqual(df[Columns.SYMBOL.value][0], "BTC_USDT")
@@ -41,7 +42,8 @@ class TestDataAPI(unittest.TestCase):
         mock_ticker.history.return_value = pdf
         # mock_yf.download.return_value = pdf # Old usage
         
-        df = pull_kline("AAPL", MarketType.STOCK, "1d", exchange=Exchange.YFINANCE)
+        result = pull_kline("AAPL", MarketType.STOCK, "1d", exchange=Exchange.YFINANCE)
+        df = result.data
         
         self.assertFalse(df.is_empty())
         self.assertEqual(df[Columns.SYMBOL.value][0], "AAPL")

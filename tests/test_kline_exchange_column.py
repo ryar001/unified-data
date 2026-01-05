@@ -16,12 +16,13 @@ class TestKlineExchangeColumn(unittest.TestCase):
     def test_crypto_exchange_column(self):
         """Test crypto kline has exchange=ccxt column."""
         try:
-            df = pull_kline(
+            res = pull_kline(
                 ticker="BTC_USDT",
                 market_type=MarketType.CRYPTO,
                 period="1d",
                 limit=5
             )
+            df = res.data
             
             self.assertIn(Columns.EXCHANGE.value, df.columns)
             # Check the value in the first row matches Exchange.CCXT ("ccxt")
@@ -34,12 +35,13 @@ class TestKlineExchangeColumn(unittest.TestCase):
     def test_stock_exchange_column(self):
         """Test stock kline has exchange=yfinance column."""
         try:
-            df = pull_kline(
+            res = pull_kline(
                 ticker="AAPL",
                 market_type=MarketType.STOCK,
                 period="1d",
                 limit=5
             )
+            df = res.data
             
             self.assertIn(Columns.EXCHANGE.value, df.columns)
             first_exchange = df[Columns.EXCHANGE.value][0]
@@ -52,13 +54,14 @@ class TestKlineExchangeColumn(unittest.TestCase):
         """Test that explicit exchange parameter is reflected in the column."""
         # Using yfinance for stock explicitly, though it is default
         try:
-            df = pull_kline(
+            res = pull_kline(
                 ticker="AAPL",
                 market_type=MarketType.STOCK,
                 period="1d",
                 limit=5,
                 exchange=Exchange.YFINANCE
             )
+            df = res.data
             
             self.assertIn(Columns.EXCHANGE.value, df.columns)
             self.assertEqual(df[Columns.EXCHANGE.value][0], Exchange.YFINANCE)

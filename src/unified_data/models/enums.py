@@ -22,3 +22,7 @@ class Exchange(StrEnum):
     CCXT = "ccxt"  # As a generic fallback or specific source
     YFINANCE = "yfinance"
     AKSHARE = "akshare"
+
+class Status(StrEnum):
+    OK = "OK"
+    FAILED = "FAILED"

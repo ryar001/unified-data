@@ -5,7 +5,8 @@ class TestInstalledPackage(unittest.TestCase):
     def test_live_pull(self):
         print("\n[Verification] Attempting to pull BTC_USDT from installed package...")
         try:
-            df = pull_kline("BTC_USDT", MarketType.CRYPTO, "1d", limit=1)
+            res = pull_kline("BTC_USDT", MarketType.CRYPTO, "1d", limit=1)
+            df = res.data
             print(f"[Verification] Success! Fetched {len(df)} rows.")
             print(df)
             self.assertFalse(df.is_empty())
