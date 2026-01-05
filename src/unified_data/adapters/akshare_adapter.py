@@ -2,7 +2,7 @@ import akshare as ak
 import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
-from ..models.enums import Columns, MarketType
+from ..models.enums import Columns, MarketType, TimeFramePeriod
 from ..utils import get_logger, calculate_start_date
 
 logger = get_logger("akshare_adapter")
@@ -37,8 +37,9 @@ class AKShareAdapter(BaseAdapter):
                  market_type = MarketType.FUTURES
 
         symbol = self.get_exchange_symbol(ticker, market_type)
+        exch_period = self.to_exchange_period(period)
         
-        logger.info(f"Fetching {symbol} from AKShare ({period})")
+        logger.info(f"Fetching {symbol} from AKShare ({exch_period})")
 
         try:
             pdf = None
@@ -46,7 +47,7 @@ class AKShareAdapter(BaseAdapter):
             if market_type == MarketType.STOCK:
                 # stock_zh_a_hist: daily data
                 adjust = "qfq" # Default forward adjust
-                pdf = ak.stock_zh_a_hist(symbol=symbol, start_date=start_str, end_date=end_str, adjust=adjust)
+                pdf = ak.stock_zh_a_hist(symbol=symbol, period=exch_period, start_date=start_str, end_date=end_str, adjust=adjust)
                 
             else:
                 # Futures
@@ -140,3 +141,16 @@ class AKShareAdapter(BaseAdapter):
         # If it's a Stock, e.g. "000001", it stays "000001".
         
         return ticker
+
+    def to_exchange_period(self, period: str) -> str:
+        # Standard: 1d, 1w, 1M
+        # Akshare: daily, weekly, monthly
+        
+        if period == TimeFramePeriod.M1 or period == "1M":
+            return "monthly"
+        if period == TimeFramePeriod.W1:
+            return "weekly"
+        if period == TimeFramePeriod.D1:
+            return "daily"
+            
+        return "daily" # Default fallback

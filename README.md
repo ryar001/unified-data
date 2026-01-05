@@ -62,6 +62,28 @@ print(df_stock.head())
 | H | Mar | N | Jul | X | Nov |
 | J | Apr | Q | Aug | Z | Dec |
 
+### Supported Timeframes
+
+The `period` argument supports a standardized set of intervals across all adapters:
+
+| Period | Description |
+| :--- | :--- |
+| `1d` | Daily |
+| `1w` | Weekly |
+| `1M` | Monthly (Note the capital **M** to distinguish from minute) |
+
+You can import these constants for type safety:
+
+```python
+from unified_data import TimeFramePeriod
+
+# Use standard constants
+period = TimeFramePeriod.D1  # "1d"
+period = TimeFramePeriod.M1  # "1M"
+```
+
+*Note: While intraday periods like `1m`, `5m`, `1h` are supported by some adapters (crypto/stocks), availability varies. The standard set above is guaranteed.*
+
 ## Usage Reference
 
 ### `pull_kline`

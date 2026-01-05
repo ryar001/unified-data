@@ -2,7 +2,7 @@ import ccxt
 import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
-from ..models.enums import Columns, MarketType
+from ..models.enums import Columns, MarketType, TimeFramePeriod
 from ..utils import get_logger
 
 logger = get_logger("ccxt_adapter")
@@ -39,10 +39,12 @@ class CCXTAdapter(BaseAdapter):
             elif isinstance(start_date, datetime):
                 since = int(start_date.timestamp() * 1000)
 
-        logger.info(f"Fetching {symbol} {period} from CCXT (since={since}, limit={limit})")
+        # Convert period
+        exchange_period = self.to_exchange_period(period)
+        logger.info(f"Fetching {symbol} {exchange_period} from CCXT (since={since}, limit={limit})")
         
         try:
-            ohlcv = exchange.fetch_ohlcv(symbol, timeframe=period, since=since, limit=limit)
+            ohlcv = exchange.fetch_ohlcv(symbol, timeframe=exchange_period, since=since, limit=limit)
         except Exception as e:
             logger.error(f"CCXT Error: {e}")
             raise
@@ -82,3 +84,19 @@ class CCXTAdapter(BaseAdapter):
         # Normalize
         ticker = ticker.upper()
         return ticker.replace("_", "/")
+
+    def to_exchange_period(self, period: str) -> str:
+        # Standard: 1d, 1w, 1M (Monthly)
+        # CCXT: 1d, 1w, 1M (Monthly)
+        
+        if period == TimeFramePeriod.M1: # "1M"
+            return "1M"
+        if period == "1m": # Explicit minute handling if passed raw
+             return "1m"
+        if period == TimeFramePeriod.W1:
+            return "1w"
+        if period == TimeFramePeriod.D1:
+            return "1d"
+            
+        # Default fallback
+        return period

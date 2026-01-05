@@ -2,7 +2,7 @@ import yfinance as yf
 import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
-from ..models.enums import Columns, MarketType
+from ..models.enums import Columns, MarketType, TimeFramePeriod
 from ..utils import get_logger, calculate_start_date
 
 logger = get_logger("yfinance_adapter")
@@ -31,7 +31,7 @@ class YFinanceAdapter(BaseAdapter):
             # Check for valid interval
             # valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
             
-            interval = period
+            interval = self.to_exchange_period(period)
             
             if not end_date:
                 end_date = datetime.now()
@@ -135,6 +135,19 @@ class YFinanceAdapter(BaseAdapter):
         # For stocks and futures, usually standard is close enough to YF
         # e.g. GC=F is standard and YF expects GC=F
         return ticker
+
+    def to_exchange_period(self, period: str) -> str:
+        # Standard: 1d, 1w, 1M
+        # YF: 1d, 1wk, 1mo
+        
+        if period == TimeFramePeriod.M1 or period == "1M":
+            return "1mo"
+        if period == TimeFramePeriod.W1:
+            return "1wk"
+        if period == TimeFramePeriod.D1:
+            return "1d"
+            
+        return period
 
 if __name__ == "__main__":
     adapter = YFinanceAdapter()

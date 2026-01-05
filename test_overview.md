@@ -8,8 +8,8 @@
 The `unified-data` package is tested using `unittest`. The suite comprises unit tests, integration tests against live APIs, and package distribution verification.
 
 ### Test Statistics
-- **Total Tests**: 35
-- **Passed**: 35
+- **Total Tests**: 44
+- **Passed**: 44
 - **Failed**: 0
 - **Errors**: 0
 
@@ -80,6 +80,13 @@ The `unified-data` package is tested using `unittest`. The suite comprises unit 
 - **Coverage**:
     - Confirmed `AkshareAdapter` no longer crashes on invalid symbols.
     - Verified `get_exchange_symbol` logic for all adapters (`RB=F` -> `RB0`, `BTC_USDT` -> `BTC/USDT`).
+
+### 12. `tests/test_timeframes.py`
+**Type**: Unit & Integration Tests
+- **Purpose**: Verifies period standardization and conversion.
+- **Coverage**:
+    - **Conversion**: Tests `to_exchange_period` for all adapters (e.g., `1M` -> `monthly` for Akshare).
+    - **Live Fetch**: Integration tests for standard periods (`1d`, `1w`, `1M`) across all adapters.
 
 ## Execution
 Tests are executed using `unittest` discovery.

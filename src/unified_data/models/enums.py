@@ -23,6 +23,12 @@ class Exchange(StrEnum):
     YFINANCE = "yfinance"
     AKSHARE = "akshare"
 
+class TimeFramePeriod(StrEnum):
+    """Standardized time frame periods."""
+    D1 = "1d"
+    W1 = "1w"
+    M1 = "1M"
+
 class Status(StrEnum):
     OK = "OK"
     FAILED = "FAILED"

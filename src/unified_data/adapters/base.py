@@ -39,6 +39,19 @@ class BaseAdapter(ABC):
         """
         pass
 
+    @abstractmethod
+    def to_exchange_period(self, period: str) -> str:
+        """
+        Convert standard period to exchange-specific period.
+        
+        Args:
+            period: Standard period (e.g. "1d", "1w", "1m").
+            
+        Returns:
+            Exchange specific period string.
+        """
+        pass
+
     def standardize_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Helper to ensure columns match the standard."""
         # This is a placeholder; implementations might enforce this 

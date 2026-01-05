@@ -16,10 +16,14 @@ def calculate_start_date(end_date: datetime, limit: int, period: str) -> datetim
         return end_date - timedelta(days=limit)
     
     value = int(match.group(1))
-    unit = match.group(2).lower()
+    raw_unit = match.group(2)
+    unit = raw_unit.lower()
     
     # Calculate duration per candle
-    if unit in ('m', 'min'):
+    if raw_unit == 'M': # Capital M for Month per standard
+        delta = timedelta(days=value * 30)
+        buffer = 2.0
+    elif unit in ('m', 'min'):
         delta = timedelta(minutes=value)
         buffer = 1.5
     elif unit in ('h', 'hour'):
