@@ -55,7 +55,7 @@ class TestAdaptersLive(unittest.TestCase):
         
         try:
             df = adapter.get_kline(ticker=ticker, period=period, limit=10)
-            
+
             print(f"\n[AKShare Stock] Fetched {len(df)} rows.")
             
             self.assertIsInstance(df, pl.DataFrame)

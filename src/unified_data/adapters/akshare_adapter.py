@@ -2,12 +2,36 @@ import akshare as ak
 import polars as pl
 from datetime import datetime
 from .base import BaseAdapter
-from ..models.enums import Columns, MarketType, TimeFramePeriod
+from ..models.enums import Columns, MarketType, TimeFramePeriod, Market
 from ..utils import get_logger, calculate_start_date
 
 logger = get_logger("akshare_adapter")
 
 class AKShareAdapter(BaseAdapter):
+    def detect_market(self, symbol: str) -> tuple[Market, str]:
+        """
+        Detects if a stock symbol belongs to the HK or China A-share market.
+        Returns: 'HK', 'A-SHARE', or 'UNKNOWN'
+        """
+        # Ensure it's a string and strip whitespace
+        symbol = str(symbol).strip()
+        
+        # If not numeric (e.g. Futures like 'RB0'), return UNKNOWN immediately
+        if not symbol.isdigit():
+            return Market.UNKNOWN, symbol
+        
+        # Logic for HK Stocks (5 digits)
+        # If the user input '700', we pad it to '00700'
+        if len(symbol) <= 5:
+            symbol = symbol.zfill(5)
+            return Market.HK, symbol
+        
+        # Logic for China A-Shares (6 digits)
+        if len(symbol) == 6:
+            return Market.A_SHARE, symbol
+        
+        return Market.UNKNOWN, symbol
+
     def get_kline(
         self, 
         ticker: str, 
@@ -41,14 +65,21 @@ class AKShareAdapter(BaseAdapter):
         
         logger.info(f"Fetching {symbol} from AKShare ({exch_period})")
 
+        market, symbol = self.detect_market(symbol)
+
         try:
             pdf = None
             
             if market_type == MarketType.STOCK:
                 # stock_zh_a_hist: daily data
                 adjust = "qfq" # Default forward adjust
-                pdf = ak.stock_zh_a_hist(symbol=symbol, period=exch_period, start_date=start_str, end_date=end_str, adjust=adjust)
-                
+                if market == Market.A_SHARE:
+                    pdf = ak.stock_zh_a_hist(symbol=symbol, period=exch_period, start_date=start_str, end_date=end_str, adjust=adjust)
+                elif market == Market.HK:
+                    pdf = ak.stock_hk_hist(symbol=symbol, period=exch_period, start_date=start_str, end_date=end_str, adjust=adjust)
+                else:
+                    logger.warning(f"Unknown market: {market}")
+                    return pl.DataFrame()
             else:
                 # Futures
                 # e.g. "RB0", "AU2412"

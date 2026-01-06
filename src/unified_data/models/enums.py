@@ -32,3 +32,8 @@ class TimeFramePeriod(StrEnum):
 class Status(StrEnum):
     OK = "OK"
     FAILED = "FAILED"
+
+class Market(StrEnum):
+    HK = "HK"
+    A_SHARE = "A-SHARE"
+    UNKNOWN = "UNKNOWN"

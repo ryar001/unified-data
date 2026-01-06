@@ -1,3 +1,25 @@
+What's New - 2026-01-06
+  AKShare Adapter
+    - Added automatic market detection for HK and China A-shares.
+    - Integrated `stock_hk_hist` for fetching Hong Kong stock data.
+
+**Date**: 2026-01-06
+
+**Warnings**:
+*   None.
+
+**Feat**:
+*   `src/unified_data/adapters/akshare_adapter.py`:
+    *   Implemented `detect_market` to distinguish between HK stocks (<= 5 digits) and China A-shares (6 digits).
+    *   Updated `get_kline` to route requests to `ak.stock_hk_hist` for HK stocks and `ak.stock_zh_a_hist` for A-shares.
+*   `src/unified_data/models/enums.py`: Added `Market` enum with values `HK`, `A_SHARE`, and `UNKNOWN`.
+
+**Tests**:
+*   `tests/test_akshare_market_detection.py`: New test file to verify market detection logic (padding, length checks) and live data fetching for both HK (e.g., '700') and A-share (e.g., '600519') markets.
+
+**Refactor**:
+*   `tests/test_adapters_live.py`: Minor formatting adjustments.
+
 What's New - 2026-01-05
   README.md
     - Added PyPI version badges to the README file.
