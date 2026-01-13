@@ -1,3 +1,19 @@
+Warnings:
+- No breakpoints found.
+
+What's New:
+src/unified_data/adapters/ccxt_strategies/base.py
+- Added abstract base class `BaseCCXTStrategy` for CCXT exchange integration.
+- Includes methods for exchange initialization, symbol conversion, and period mapping.
+
+src/unified_data/adapters/ccxt_strategies/binance.py
+- Implemented `BinanceStrategy` inheriting from `BaseCCXTStrategy`.
+- Adds Binance-specific symbol and period conversions.
+
+src/unified_data/adapters/ccxt_strategies/coinbase.py
+- Implemented `CoinbaseStrategy` inheriting from `BaseCCXTStrategy`.
+- Adds Coinbase-specific symbol conversion, including USDT to USD fallback, and period mapping.
+
 **Refactor**
 *   `src/unified_data/adapters/ccxt_adapter.py`: Introduced a strategy pattern for CCXT adapters, enabling exchange-specific symbol and period conversion logic. This enhances flexibility and maintainability.
 *   `src/unified_data/api.py`: Modified the CCXT adapter routing to default to `Exchange.COINBASE`.
