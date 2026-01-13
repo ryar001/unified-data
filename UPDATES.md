@@ -1,3 +1,21 @@
+**Refactor**
+*   `src/unified_data/adapters/ccxt_adapter.py`: Introduced a strategy pattern for CCXT adapters, enabling exchange-specific symbol and period conversion logic. This enhances flexibility and maintainability.
+*   `src/unified_data/api.py`: Modified the CCXT adapter routing to default to `Exchange.COINBASE`.
+*   `src/unified_data/models/enums.py`: Added `CcxtExchange` enum and included `TQSDK`, `COINBASE` in the main `Exchange` enum.
+
+**Tests**
+*   `tests/test_ccxt_strategies.py`: New file added with unit tests for `BinanceStrategy` and `CoinbaseStrategy`, covering symbol conversion, period mapping, and Coinbase's smart symbol fallback.
+*   `tests/test_adapters_live.py`: New live integration tests for CCXT Binance and Coinbase adapters have been added to ensure real-time data fetching works as expected.
+*   `tests/test_e2e.py`: Enhanced end-to-end tests with more specific assertions for exchange attribution and added a new test case for handling API failures and invalid inputs.
+*   `tests/test_ws_smoke.py`: New file added with smoke tests for WebSocket adapter functionality.
+*   Removed files: `tests/test_api_response.py`, `tests/test_basic.py`, `tests/test_kline_exchange_column.py`.
+
+**Documentation**
+*   `test_overview.md`: Updated to reflect the CCXT refactoring, the introduction of the strategy pattern, and the consolidation of existing tests.
+
+**Dependencies**
+*   `pyproject.toml` & `uv.lock`: Added/updated dependencies including `numpy<2`, `tqsdk>=3.8.9`, and `pytest-asyncio>=1.3.0`.
+
 What's New - 2026-01-06
   AKShare Adapter
     - Added automatic market detection for HK and China A-shares.

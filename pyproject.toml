@@ -1,20 +1,23 @@
 [project]
 name = "unified-data"
-version = "0.3.4"
+version = "0.4.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "akshare>=1.18.4",
     "ccxt>=4.5.30",
+    "numpy<2",
     "polars>=1.36.1",
     "pyarrow>=22.0.0",
+    "tqsdk>=3.8.9",
     "yfinance>=1.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
 ]
 
 [tool.pytest.ini_options]

@@ -7,7 +7,7 @@ from .utils import get_logger
 
 logger = get_logger("data_api")
 
-def _get_adapter(market_type: str, exchange: str | None) -> tuple[BaseAdapter, str]:
+def _get_adapter(market_type: str, exchange: Exchange | None) -> tuple[BaseAdapter, str]:
     """Factory to get the correct adapter instance and the resolved exchange name."""
     
     # Default routing logic
@@ -27,13 +27,16 @@ def _get_adapter(market_type: str, exchange: str | None) -> tuple[BaseAdapter, s
     # Note: Imports are inside to avoid circular deps or heavy load if not needed
     if exchange == Exchange.CCXT:
         from .adapters.ccxt_adapter import CCXTAdapter
-        return CCXTAdapter(), exchange
+        # Default CCXT routing to Coinbase as per new requirement
+        exchange = Exchange.COINBASE if exchange == Exchange.CCXT else exchange
+        return CCXTAdapter(exchange_id=exchange), exchange
     elif exchange == Exchange.YFINANCE:
         from .adapters.yfinance_adapter import YFinanceAdapter
         return YFinanceAdapter(), exchange
     elif exchange == Exchange.AKSHARE:
         from .adapters.akshare_adapter import AKShareAdapter
         return AKShareAdapter(), exchange
+
     else:
         raise ValueError(f"Unsupported exchange: {exchange}")
 

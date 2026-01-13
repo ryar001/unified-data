@@ -103,16 +103,16 @@ class TestAdaptersLive(unittest.TestCase):
         except Exception as e:
             self.fail(f"AKShare Futures live test failed with error: {e}")
 
-    def test_ccxt_adapter_live_crypto(self):
+    def test_ccxt_binance_live(self):
         """Test fetching Crypto data from CCXT (Binance)."""
-        adapter = CCXTAdapter()
+        adapter = CCXTAdapter(exchange_id="binance")
         ticker = "BTC_USDT"
         period = "1d"
         
         try:
             df = adapter.get_kline(ticker=ticker, period=period, limit=5)
             
-            print(f"\n[CCXT Crypto] Fetched {len(df)} rows.")
+            print(f"\n[CCXT Binance] Fetched {len(df)} rows.")
             
             self.assertIsInstance(df, pl.DataFrame)
             self.assertFalse(df.is_empty(), "Returned DataFrame should not be empty")
@@ -134,7 +134,41 @@ class TestAdaptersLive(unittest.TestCase):
             self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
             
         except Exception as e:
-            self.fail(f"CCXT live test failed with error: {e}")
+            self.fail(f"CCXT Binance live test failed with error: {e}")
+
+    def test_ccxt_coinbase_live(self):
+        """Test fetching Crypto data from CCXT (Coinbase)."""
+        print("\nUsing CCXTAdapter with exchange_id='coinbase'")
+        adapter = CCXTAdapter(exchange_id="coinbase")
+        ticker = "BTC_USD" # Coinbase uses BTC/USD usually
+        period = "1d"
+        
+        try:
+            df = adapter.get_kline(ticker=ticker, period=period, limit=5)
+            
+            print(f"\n[CCXT Coinbase] Fetched {len(df)} rows.")
+            
+            self.assertIsInstance(df, pl.DataFrame)
+            self.assertFalse(df.is_empty(), "Returned DataFrame should not be empty")
+            
+            # Check columns
+            expected_cols = [
+                Columns.TIMESTAMP.value, 
+                Columns.OPEN.value, 
+                Columns.HIGH.value, 
+                Columns.LOW.value, 
+                Columns.CLOSE.value, 
+                Columns.VOLUME.value,
+                Columns.SYMBOL.value
+            ]
+            for col in expected_cols:
+                self.assertIn(col, df.columns)
+                
+            # Check symbol - Note: Adapter normalizes to BTC/USD
+            self.assertEqual(df[Columns.SYMBOL.value][0], ticker) 
+            
+        except Exception as e:
+            self.fail(f"CCXT Coinbase live test failed with error: {e}")
 
     def test_yfinance_adapter_live_stock(self):
         """Test fetching Stock data from YFinance."""

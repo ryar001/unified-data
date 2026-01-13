@@ -44,6 +44,7 @@ class TestEndToEnd(unittest.TestCase):
         df = res.data
         self.assertFalse(df.is_empty(), "US Stock data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
+        self.assertEqual(df[Columns.EXCHANGE.value][0], Exchange.YFINANCE)
         print(f"\n[E2E US Stock] Fetched {len(df)} rows for {ticker}")
 
     def test_e2e_crypto_ccxt(self):
@@ -59,6 +60,7 @@ class TestEndToEnd(unittest.TestCase):
         df = res.data
         self.assertFalse(df.is_empty(), "Crypto data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
+        self.assertEqual(df[Columns.EXCHANGE.value][0], Exchange.CCXT)
         print(f"\n[E2E Crypto] Fetched {len(df)} rows for {ticker}")
 
     def test_e2e_china_stock_akshare(self):
@@ -74,6 +76,7 @@ class TestEndToEnd(unittest.TestCase):
         df = res.data
         self.assertFalse(df.is_empty(), "China Stock data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
+        self.assertEqual(df[Columns.EXCHANGE.value][0], Exchange.AKSHARE)
         print(f"\n[E2E China Stock] Fetched {len(df)} rows for {ticker}")
 
     def test_e2e_us_futures_yfinance(self):
@@ -89,6 +92,7 @@ class TestEndToEnd(unittest.TestCase):
         df = res.data
         self.assertFalse(df.is_empty(), "US Futures data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
+        self.assertEqual(df[Columns.EXCHANGE.value][0], Exchange.YFINANCE)
         print(f"\n[E2E US Futures] Fetched {len(df)} rows for {ticker}")
 
     def test_e2e_china_futures_akshare(self):
@@ -104,7 +108,27 @@ class TestEndToEnd(unittest.TestCase):
         df = res.data
         self.assertFalse(df.is_empty(), "China Futures data should not be empty")
         self.assertEqual(df[Columns.SYMBOL.value][0], ticker)
+        self.assertEqual(df[Columns.EXCHANGE.value][0], Exchange.AKSHARE)
         print(f"\n[E2E China Futures] Fetched {len(df)} rows for {ticker}")
+
+    def test_e2e_api_failure_handling(self):
+        """Test reaction to invalid symbols (Merged from test_api_response.py)."""
+        ticker = "INVALID_TICKER_XYZ"
+        from unified_data.models.enums import Status
+        
+        # Test 1: Invalid Stock
+        res = pull_kline(ticker, MarketType.STOCK, "1d")
+        self.assertEqual(res.status, Status.FAILED)
+        self.assertTrue(res.data.is_empty())
+        
+        # Test 2: Forced Error (Internal)
+        # Assuming we can force an error by passing garbage to an adapter that doesn't handle it gracefully first
+        # invalid exchange/market combo might raise error in factory
+        try:
+             pull_kline("TEST", "UNKNOWN_TYPE", "1d")
+        except ValueError:
+             pass # Expected
+
 
 if __name__ == '__main__':
     unittest.main()

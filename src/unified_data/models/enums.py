@@ -22,6 +22,13 @@ class Exchange(StrEnum):
     CCXT = "ccxt"  # As a generic fallback or specific source
     YFINANCE = "yfinance"
     AKSHARE = "akshare"
+    TQSDK = "tqsdk"
+    COINBASE = "coinbase"
+
+class CcxtExchange(StrEnum):
+    """Supported CCXT exchanges."""
+    BINANCE = "binance"
+    COINBASE = "coinbase"
 
 class TimeFramePeriod(StrEnum):
     """Standardized time frame periods."""
